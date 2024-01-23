@@ -5,7 +5,7 @@ RUN apt-get update \
 && apt-get install -y curl software-properties-common wget unzip \
 && rm -rf /var/lib/apt/lists/*
 
-COPY imgprd-appdeb10-9.0.1.3v3.tar.gz /home/depotapp/
+COPY C:\Users\a.lenglet\OneDrive - EVOLUCARE TECHNOLOGIES\Documents\Dev_downloads\imgprd-appdeb10-9.0.1.3v3.tar.gz /home/depotapp/
 
 RUN useradd -s /bin/bash -m support \
 && export PATH=$PATH:/usr/sbin
@@ -49,23 +49,23 @@ RUN apt-get update && apt-get install -y \
     libparse-debianchangelog-perl \
     libsub-name-perl \
     libtimedate-perl \
-    liburi-perl
-49.76  binfmt-support
-49.76  mono-runtime-common
-49.76  mono-runtime-sgen
-49.76  mono-runtime
-49.76  ca-certificates-mono
-49.76  libmono-corlib4.5-cil
-49.76  libmono-i18n-west4.0-cil
-49.76  libmono-i18n4.0-cil
-49.76  libmono-system-configuration4.0-cil
-49.76  libmono-system-core4.0-cil
-49.76  libmono-system-numerics4.0-cil
-49.76  libmono-system-xml4.0-cil
-49.76  libmono-system4.0-cil
-49.76  libglib2.0-cil
-49.76  libmono-security4.0-cil
-49.76  libmono-system-security4.0-cil
+    liburi-perl \
+    binfmt-support \
+    mono-runtime-common \
+    mono-runtime-sgen \
+    mono-runtime \
+    ca-certificates-mono \
+    libmono-corlib4.5-cil \
+    libmono-i18n-west4.0-cil \
+    libmono-i18n4.0-cil \
+    libmono-system-configuration4.0-cil \
+    libmono-system-core4.0-cil \
+    libmono-system-numerics4.0-cil \
+    libmono-system-xml4.0-cil \
+    libmono-system4.0-cil \
+    libglib2.0-cil \
+    libmono-security4.0-cil \
+    libmono-system-security4.0-cil
 
 RUN cd /home/depotapp \
 && tar -zxvf /home/depotapp/imgprd-appdeb10-9.0.1.3v3.tar.gz \
