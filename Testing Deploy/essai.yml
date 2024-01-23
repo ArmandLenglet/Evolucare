@@ -1,0 +1,55 @@
+---
+- name: Créer une nouvelle VM-IMGPRD-HUB dans Hyper-V
+  hosts: all
+  gather_facts: no
+  vars:
+    VMName: "VM-IMGPRD-HUB"
+    VMPath: "N:\\HYPERV\\"
+    VMCpu: "2"
+    VMRam: "2GB"
+    SwitchInterne: "vSwitch Interne"
+    URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-HUBv3_master/IMGPRD-HUB_MASTER_HV.zip"
+       
+  tasks:
+    - name: Création des vSwitch Interne
+      ansible.windows.win_shell: |
+        New-VMSwitch -Name "{{ SwitchInterne }}" -SwitchType Internal -Notes "For Evolucare Imaging Internal VMs"
+        New-NetIPAddress -IPAddress 10.42.42.1 -InterfaceAlias "vEthernet ({{ SwitchInterne }})"
+        Disable-NetAdapterBinding -InterfaceAlias "vEthernet ({{ SwitchInterne }})" -ComponentID ms_tcpip6
+
+    - name: Créer la machine virtuelle avec 2 vCPU et disque principal dans le répertoire VM
+      ansible.windows.win_shell: |
+        New-VM -Name "{{ VMName }}" -MemoryStartupBytes 2147483648 -Generation 1 -SwitchName "{{ SwitchInterne }}" -Path "{{ VMPath }}"
+        Set-VM -Name "{{ VMName }}" -ProcessorCount "{{ VMCpu }}"
+        New-Item "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks" -ItemType Directory
+      register: vm_creation_output
+
+    - name: Download du Master, Conversion vHDX et Intégration
+      ansible.windows.win_shell: |
+        $pair = "$('DownloadsMaster'):$('1Y6fhgt?MQ?InkR#75UWy1TujTNN?Sf&5bvE#BnX')"
+        $encodedCreds = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($pair))
+        $basicAuthValue = "Basic $encodedCreds"
+        $Headers = @{
+          	Authorization = $basicAuthValue
+        }
+        $downloadCommand = "Invoke-WebRequest -Uri ""{{ URLHUB }}"" -OutFile ""{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-HUB_MASTER_HV.zip"" -Headers $Headers"
+        Measure-Command { Invoke-Expression $downloadCommand }
+        
+        Expand-Archive -LiteralPath "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-HUB_MASTER_HV.zip" -DestinationPath "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\" -Force
+        Convert-VHD -Path "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\MASTER-IMGPRD-HUB-disk1.vhd" -DestinationPath "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\{{ VMName }}-disk1-fixe.vhdx" -VHDType Fixed
+        Convert-VHD -Path "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\MASTER-IMGPRD-HUB-disk2.vhd" -DestinationPath "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\{{ VMName }}-disk2-fixe.vhdx" -VHDType Fixed
+        Add-VMHardDiskDrive -VMName "{{ VMName }}" -Path "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\{{ VMName }}-disk1-fixe.vhdx"
+        Add-VMHardDiskDrive -ControllerType SCSI -VMName "{{ VMName }}" -Path "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\{{ VMName }}-disk2-fixe.vhdx"
+
+    - name: Nettoyage des disques et répertoire
+      ansible.windows.win_shell: |
+        rm "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-HUB_MASTER_HV.zip" -Force
+        rm "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\*.vhd" -Force    
+           
+    - name: Vérifier la sortie de la création de la VM
+      debug:
+          var: vm_creation_output.stdout
+
+    - name: Démarrer la VM nouvellement créée
+      ansible.windows.win_shell: |
+        Start-VM -Name "{{ VMName }}"

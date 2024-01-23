@@ -1,0 +1,97 @@
+---
+- name: Deploiment du script bash Evolucare
+  hosts: all
+  gather_facts: no
+  vars:
+    VMTYPE: "$(cut -d '-' -f 2 /etc/hostname)"
+    CLIENT: "hayoun"
+    HOSTMAIL: "mail.cimmagenta.fr"				 	
+    USERMAIL: "noreply@cimmagenta.fr"	    			
+    PASSWORDMAIL: 'tQ1_RzwTrXD3mBE'							
+    HOSTNAME: "imgprd-$VMTYPE-$CLIENT"
+    IPP: "570"
+    AUTOUPDATEH: "23"			
+    AUTOUPDATEM: "30"					
+
+    IP: "IP${VMTYPE^^}"
+    NETMASK: "255.255.255.0"
+    IPGATEWAY: "192.168.25.1" 	
+    NDD: "cimmagenta.fr"  		
+    DNS1: "192.168.25.1"							
+    DNS2: "1.1.1.1"
+
+    ISMIPIH: "false"								
+    ISHYPERV: "true"								
+    ISTX: "false"
+
+    IPAPP: "10.42.42.100"   				
+    IPAPPINTERNE: "10.42.42.10"
+    IPBDD: "10.42.42.101"   					
+    IPBDDINTERNE: "10.42.42.11"
+    IPHUB: "10.42.42.1"   				
+    IPUVIEW: "10.42.42.102" 					    
+    IPINTEROP: "10.42.42.103"       			
+    IPAPPBIS: "10.42.42.104"        		
+    IPNAS: "10.42.42.105"   
+
+   
+  tasks:
+
+    - name: Deploy script global base
+      copy:
+       dest: /tmp/mainglobal.sh
+       content: |
+       #!/bin/bash
+       echo -e "${G}[+] EDIT HOSTNAME TO $HOSTNAME"
+       echo $HOSTNAME > /etc/hostname
+       hostname $HOSTNAME
+       sed -i "s;.*127.0.1.1.*;127.0.1.1\t$HOSTNAME;" /etc/hosts
+       cp /dev/null /etc/resolv.conf
+       if [[ "{{ IPGATEWAY }}" != "" ]]
+       then
+	       echo -e "${G}[+] ADD DNS1 TO "{{ DNS1 }}""
+	       echo "nameserver "{{ DNS1 }}"" >> /etc/resolv.conf
+       fi
+       echo -e "${G}[+] ADD DNS2 TO "{{ DNS2 }}""
+       echo "nameserver "{{ DNS2 }}"" >> /etc/resolv.conf
+       echo -e "${G}[+] EDIT GENERAL SCRIPTS.CONF"
+       sed -i 's;.*HOSTNAME_NAGIOS.*;HOSTNAME_NAGIOS="'${HOSTNAME^^}'";' /opt/scripts/scripts.conf
+       echo -e "${G}[+] EDIT GENERAL CRONTAB"
+       if [[ "{{ AUTOUPDATEH }}" != "" ]] || [[ "{{ AUTOUPDATEM }}" != "" ]]
+       then
+	       crontab -l | sed -r "s;.*/opt/scripts/autoupdate.sh.*;"{{ AUTOUPDATEM }}" "{{ AUTOUPDATEH }}"     \* \* \*   \/opt\/scripts\/autoupdate.sh \>\> \/var\/log\/etmi\/scripts.log 2\>\&1;g" | crontab -
+       fi
+       crontab -l | sed '/local-nagios-check/s/^#//g' | crontab -
+       if [[ "{{ IPAPP }}" != "" || "{{ IPBDD }}" != "" || "{{ IPINTEROP }}" != "" || "{{ IPHUB }}" != "" || "{{ IPUVIEW }}" != "" ]]
+       then
+	       echo -e "${G}[+] CONFIGURE ETH0 NETWORK"
+	       echo '# This file describes the network interfaces available on your system' > /etc/network/interfaces
+	       echo -e "# and how to activate them. For more information, see interfaces(5).\n" >> /etc/network/interfaces
+	       echo -e "source /etc/network/interfaces.d/*\n" >> /etc/network/interfaces
+	       echo '# The loopback network interface' >> /etc/network/interfaces
+	       echo 'auto lo' >> /etc/network/interfaces
+	       echo -e "iface lo inet loopback\n" >> /etc/network/interfaces
+	       echo '# The primary network interface' >> /etc/network/interfaces
+	       echo 'auto eth0' >> /etc/network/interfaces
+	       echo 'allow-hotplug eth0' >> /etc/network/interfaces
+	       echo 'iface eth0 inet static' >> /etc/network/interfaces
+	       echo -e "\taddress ${!IP}" >> /etc/network/interfaces
+	       echo -e "\tnetmask $NETMASK" >> /etc/network/interfaces
+	       echo -e "\tgateway "{{ IPGATEWAY }}"" >> /etc/network/interfaces
+	       echo -e "\tpost-up iptables-restore < /etc/iptables.up.rules\n" >> /etc/network/interfaces
+	       echo -e "#auto eth1" >> /etc/network/interfaces
+	       echo '#allow-hotplug eth1' >> /etc/network/interfaces
+	       echo '#iface eth1 inet static' >> /etc/network/interfaces
+	       echo -e "\t#address 10.42.42.X" >> /etc/network/interfaces
+	       echo -e	"\t#netmask 255.255.255.0" >> /etc/network/interfaces
+	       sed -i "/iface eth0 inet dhcp/d" /etc/network/interfaces
+	       systemctl restart networking
+      fi
+       
+    - name: Run Shell Script.
+      shell: sh /tmp/mainglobal.sh
+
+    - name: Remove Shell Script
+      file:
+       path: /tmp/mainglobal.sh
+       state: absent

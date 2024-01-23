@@ -1,0 +1,35 @@
+---
+- name: Créer une nouvelle VM-APP dans Hyper-V avec PowerShell
+  hosts: all
+  gather_facts: no
+  vars:
+    vcpu: "2"
+    vram: "4GB"
+    vm_location: "C:\\HyperV\\VMs"
+    disk_location: "C:\\HyperV\\Disks"
+    
+  tasks:
+    - name: Create Internal vSwitch
+      win_shell: New-VMSwitch -Name InternalSwitch -SwitchType Internal
+      
+    - name: Get NICs for External vSwitch
+      win_shell: Get-NetAdapter | Where-Object { $_.InterfaceDescription -like "*your criteria*" } | Select-Object -ExpandProperty Name
+      register: external_nics
+
+    - name: Create External vSwitch for each NIC found
+      win_shell: New-VMSwitch -Name ExternalSwitch -SwitchType External -NetAdapterName "{{ item }}"
+      
+    - name: Create VM directory
+      win_shell: New-Item -Path "{{ vm_location }}" -ItemType Directory
+
+    - name: Create Disk directory
+      win_shell: New-Item -Path "{{ disk_location }}" -ItemType Directory
+
+    - name: Create VM
+      win_shell: New-VM -Name MyVM -MemoryStartupBytes {{ vram }} -Path "{{ vm_location }}" -NewVHDPath "{{ disk_location }}/MyDisk.vhdx" -NewVHDSizeBytes 10GB
+      
+    - name: Add Internal vSwitch to VM
+      win_shell: Add-VMNetworkAdapter -VMId "{{ vm_id.stdout }}" -SwitchName InternalSwitch
+
+    - name: Add External vSwitch to VM
+      win_shell: Add-VMNetworkAdapter -VMId "{{ vm_id.stdout }}" -SwitchName ExternalSwitch

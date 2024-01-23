@@ -1,0 +1,55 @@
+$internetConnected = Test-Connection -ComputerName www.google.com -Count 2 -Quiet
+
+# Si la connexion Internet est disponible
+if ($internetConnected) {
+    # Récupérer l'ID TeamViewer
+    $clientID64 = Get-ItemProperty -Path 'HKLM:\SOFTWARE\TeamViewer' -Name ClientID -ErrorAction SilentlyContinue
+    $clientID32 = Get-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\TeamViewer' -Name ClientID -ErrorAction SilentlyContinue
+
+    # Construire le message
+    $message = "ID TeamViewer non trouvé."
+    if ($clientID64) {
+        $message = "ID TeamViewer : $($clientID64.ClientID) / IP One : $($ipone) / Port Ansible : $($portansible) / Port SSH : $($portssh)"
+    } elseif ($clientID32) {
+        $message = "ID TeamViewer : $($clientID32.ClientID) / IP One : $($ipone) / Port Ansible : $($portansible) / Port SSH : $($portssh)"
+    }
+
+    # Récupération de l'ip one
+    $ipone = curl ifconfig.me
+
+    # Récupératio des ports ouverts
+    $portansible = netstat -na | Select-String "22022"
+    $portssh = netstat -na | Select-String "22000"
+
+    # Informations de connexion pour l'e-mail
+    $smtpServer = "mail.img-evolucare.com"
+    $smtpFrom = "awx@img-evolucare.com"
+    $smtpTo = "itimaging@evolucare.com"
+    $messageSubject = "Rapport TeamViewer"
+    $messageBody = $message
+
+    # Informations de connexion pour l'e-mail (ajout du login et mot de passe)
+    $smtpUsername = "awx@img-evolucare.com"
+    $smtpPassword = "wF6_qrV@z82efqW"
+
+    # Envoi par e-mail
+    $securePassword = ConvertTo-SecureString -String $smtpPassword -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential ($smtpUsername, $securePassword)
+
+    Send-MailMessage -SmtpServer $smtpServer -From $smtpFrom -To $smtpTo -Subject $messageSubject -Body $messageBody -Credential $credential
+
+    # Envoi sur Teams (exemple, adapte selon tes besoins)
+
+    $headers = @{
+      'Content-Type' = 'application/json'
+    }
+
+    $body = @{
+       text = $message
+    } | ConvertTo-Json
+
+    Invoke-WebRequest -Uri 'https://evolucare.webhook.office.com/webhookb2/b9030cb5-bc6f-47a7-bd33-9375b84c8c37@2b4b3e6a-d583-4961-985c-560a2bb0df3d/IncomingWebhook/58036a826fd740f480404d422dc390ea/54b1da73-78af-44c2-b168-6fd7ec42b397' -Method Post -Headers $headers -Body $body
+
+} else {
+    Write-Output "Pas de connexion Internet détectée."
+}

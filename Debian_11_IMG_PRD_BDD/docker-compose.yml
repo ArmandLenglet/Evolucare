@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  imgprdbdd:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: sleep infinity
+    ports:
+      - 3306:3306
+      - 4444:4444
+      - 4567:4567
+      - 4568:4568
+    volumes:
+      - imgprdbdd:/data
+
+volumes:
+  imgprdbdd:

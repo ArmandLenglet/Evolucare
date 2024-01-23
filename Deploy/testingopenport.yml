@@ -1,0 +1,15 @@
+---
+- name: Vérification du port 22000 sur tous les hôtes
+  hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+  - name: checking service status
+    command: systemctl status "{{ item }}"
+    with_items:
+    - sshd
+    register: result
+    ignore_errors: yes
+  - name: showing report
+    debug:
+     var: result

@@ -1,0 +1,66 @@
+---
+- name: Evolucare Déploiment ITImaging
+  hosts: all
+  gather_facts: no
+  vars:
+    VMClient: "Evolucare interne"
+    VMName: "VM-IMGPRD-HUB"
+    VMPath: "D:\\HYPERV\\"
+    VMCpu: "2"
+    SwitchInterne: "vSwitch Interne"
+    SwitchExterne: "VM-PROD"
+    URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-HUBv3_master/IMGPRD-HUB_MASTER_HV.zip"
+    DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-HUB_MASTER_HV.zip"
+    DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"
+    UserName: "a.lenglet"
+    UserPassword: "Armand@3279!"
+    Cred: New-Object System.Management.Automation.PSCredential ("{{ UserName }}{{ UserPassword }}")
+        
+  tasks:
+     
+    - name: Créer la machine virtuelle {{ VMName }}
+      ansible.windows.win_shell: |
+        New-VM -Name "{{ VMName }}" -MemoryStartupBytes 3221225472 -Generation 1 -SwitchName "{{ SwitchInterne }}" -Path "{{ VMPath }}"
+        Set-VM -Name "{{ VMName }}" -ProcessorCount "{{ VMCpu }}"
+        New-Item "{{ DiskPath }}" -ItemType Directory
+        Add-VMNetworkAdapter -VMName "{{ VMName }}" -SwitchName "{{ SwitchExterne }}"
+      ignore_errors: true
+      register: vm_creation_output
+
+    - name: Check vérification
+      debug:
+          var: vm_creation_output.stdout
+
+    - name: Téléchargement du Master {{ VMName }}
+      ansible.windows.win_get_url:
+        url: "{{ URLHUB }}"
+        dest: "{{ DiskDestination }}"
+        url_username: "{{ UserName }}"
+        url_password: "{{ UserPassword }}"
+  
+    - name: Conversion vHDX et Intégration
+      ansible.windows.win_shell: |      
+        Expand-Archive -LiteralPath "{{ DiskDestination }}" -DestinationPath "{{ DiskPath }}" -Force
+        Convert-VHD -Path "{{ DiskPath }}MASTER-IMGPRD-HUB-disk1.vhd" -DestinationPath "{{ DiskPath }}{{ VMName }}-disk1-fixe.vhdx" -VHDType Fixed
+        Convert-VHD -Path "{{ DiskPath }}MASTER-IMGPRD-HUB-disk2.vhd" -DestinationPath "{{ DiskPath }}{{ VMName }}-disk2-fixe.vhdx" -VHDType Fixed
+        Add-VMHardDiskDrive -VMName "{{ VMName }}" -Path "{{ DiskPath }}{{ VMName }}-disk1-fixe.vhdx"
+        Add-VMHardDiskDrive -ControllerType SCSI -VMName "{{ VMName }}" -Path "{{ DiskPath }}{{ VMName }}-disk2-fixe.vhdx"
+      register: add_convert_disk
+
+    - name: Check vérification
+      debug:
+          var: add_convert_disk.stdout
+       
+    - name: Nettoyage des disques et répertoire
+      ansible.windows.win_shell: |
+        rm "{{ DiskPath }}\IMGPRD-HUB_MASTER_HV.zip" -Force
+        rm "{{ DiskPath }}\*.vhd" -Force
+      register: remove_files
+
+    - name: Check vérification
+      debug:
+          var: remove_files.stdout
+
+    - name: Démarrer la VM nouvellement créée
+      ansible.windows.win_shell: |
+        Start-VM -Name "{{ VMName }}"

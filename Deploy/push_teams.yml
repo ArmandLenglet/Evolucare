@@ -1,0 +1,15 @@
+- name: Envoi du webhook POST
+  hosts: localhost
+  vars:
+    webhook_url: "https://evolucare.webhook.office.com/webhookb2/b9030cb5-bc6f-47a7-bd33-9375b84c8c37@2b4b3e6a-d583-4961-985c-560a2bb0df3d/IncomingWebhook/0c84d034a0d6446baec23eac224b0288/5a806b24-ccd0-463d-9a8c-a098c09c50b5"
+    payload_data: "Test --- OK"
+  tasks:
+    - name: Envoi du webhook POST
+      uri:
+        url: "{{ webhook_url }}"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body_format: json
+        body: "{{ payload_data | to_nice_json }}"
+        status_code: 200
