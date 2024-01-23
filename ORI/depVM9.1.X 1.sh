@@ -19,46 +19,45 @@ ERRORS=()
 #################
 #Variables TO EDIT
 VMTYPE=$(cut -d '-' -f 2 /etc/hostname)
-CLIENT="cps"								#a changer en minuscule | futur hostname - exemple : (imgprd-app-nomduclient)
-HOSTNAME="imgprd-$VMTYPE-$CLIENT"
+CLIENT=""								#a changer en minuscule | futur hostname - exemple : (imgprd-app-nomduclient)
+HOSTNAME="imgprd-$VMTYPE"
 AUTOUPDATEH="00"							#a changer | heure autoupdate dans crontab
 AUTOUPDATEM="30"							#a changer | minute autoupdate dans crontab
-IPGATEWAY="10.100.0.254" 					#a changer | passerelle reseau
+IPGATEWAY="" 					#a changer | passerelle reseau
 IP="IP${VMTYPE^^}"
 NETMASK="255.255.255.0" 					#a changer | masque reseau
-NDD="apps-cps.com"  				#a changer | nom de domaine du client
-DNS1="10.80.0.1"							#peut etre remplace par une ip entre guillemets "" ou quotes ''
-DNS2="10.100.0.254"
+NDD=""  				#a changer | nom de domaine du client
+DNS1=""							#peut etre remplace par une ip entre guillemets "" ou quotes ''
+DNS2=""
 ISMIPIH=false								#peut etre remplace par une autre ip entre guillemets "" ou quotes ''
 ISHYPERV=true								#HYPERV (true) OR ESX (false)
 ISTX=false									#TX (true) OR NOT TX (false)
 
 #Variables APP
-IPAPP="10.80.0.101"   					#a changer | adresse ip de la vm app
-IPAPPINTERNE="10.42.42.2"
-IPP="574"       							#a changer | ipp a definir, vide "" par défaut = 1
-HOSTMAIL="mail.apps-cps.com"				 		#a changer | serveur mail correspondant au nom de domaine
-USERMAIL="noreply@apps-cps.com"	    				#a changer | user mail du nom de domaine
-PASSWORDMAIL='dB4@zTEHmrMDn$n'  		 	#a changer | password mail correspondant a l utilisateur du dessus
+IPAPP=""   					#a changer | adresse ip de la vm app
+IPP=""       							#a changer | ipp a definir, vide "" par défaut = 1
+HOSTMAIL=""				 		#a changer | serveur mail correspondant au nom de domaine
+USERMAIL=""	    				#a changer | user mail du nom de domaine
+PASSWORDMAIL=''  		 	#a changer | password mail correspondant a l utilisateur du dessus
 
 #Variables BDD
-IPBDD="10.80.0.102"   					#a changer | adresse ip de la vm bdd
-IPBDDINTERNE="10.42.42.3"
+IPBDD=""   					#a changer | adresse ip de la vm bdd
+IPBDDINTERNE="10.42.42.102"
 
 #Variables HUB
-IPHUB="10.80.0.105"   						#a changer, vide "" si aucun | adresse ip de la vm hub
+IPHUB=""   						#a changer, vide "" si aucun | adresse ip de la vm hub
 
 #Variable UVIEW
-IPUVIEW="10.80.0.103" 					    #a changer, vide "" si aucun | adresse ip de la vm uview
+IPUVIEW="" 					    #a changer, vide "" si aucun | adresse ip de la vm uview
 
 #Variables INTEROP
-IPINTEROP="10.80.0.104"       				#a changer, vide "" si aucun | adresse ip de la vm introp
+IPINTEROP=""       				#a changer, vide "" si aucun | adresse ip de la vm introp
 
 #Variables APPBIS
-IPAPPBIS="10.80.0.106"        			#a changer, vide "" si aucun | adresse ip de la vm appbis
+IPAPPBIS=""        			#a changer, vide "" si aucun | adresse ip de la vm appbis
 
 #Variable NAS BACKUP
-IPNAS="10.80.0.125"   					#a changer, vide "" si aucun | adresse ip du NAS
+IPNAS=""   					#a changer, vide "" si aucun | adresse ip du NAS
 
 ################
 #Main GLOBAL
@@ -79,7 +78,7 @@ echo -e "${G}[+] ADD DNS2 TO $DNS2"
 echo "nameserver $DNS2" >> /etc/resolv.conf
 
 echo -e "${G}[+] EDIT GENERAL SCRIPTS.CONF"
-sed -i 's;.*HOSTNAME_NAGIOS.*;HOSTNAME_NAGIOS="'${HOSTNAME^^}'";' /opt/scripts/scripts.conf
+sed -i 's;.*HOSTNAME_NAGIOS.*;HOSTNAME_NAGIOS="imgprd-bdd";' /opt/scripts/scripts.conf
 
 #CRONTAB
 echo -e "${G}[+] EDIT GENERAL CRONTAB"
@@ -156,16 +155,16 @@ then
 		#IF ESX, USE $IPAPP,ELSE, USE $IPINTERNE
 		echo -e "${G}[+] CONFIGURE IPTABLES"
 		if [[ $ISHYPERV == false ]]; then
-			sed -i "s;-A INPUT -p tcp -m tcp --dport 3306 -s 10.42.42.2 -j ACCEPT;-A INPUT -p tcp -m tcp --dport 3306 -s $IPAPP -j ACCEPT;" /etc/iptables.up.rules
+			sed -i "s;-A INPUT -p tcp -m tcp --dport 3306 -s 10.42.42.2 -j ACCEPT;-A INPUT -p tcp -m tcp --dport 3306 -s 10.42.42.101 -j ACCEPT;" /etc/iptables.up.rules
 		fi
 		
 		if [[ $IPAPPBIS != "" ]]
         then
-			sed -i "/.*CONNEXION TO MARIADB.*/a -A INPUT -p tcp -m tcp --dport 3306 -s $IPAPPBIS -j ACCEPT" /etc/iptables.up.rules
+			sed -i "/.*CONNEXION TO MARIADB.*/a -A INPUT -p tcp -m tcp --dport 3306 -s 10.42.42.105 -j ACCEPT" /etc/iptables.up.rules
 		fi
 		if [[ $IPINTEROP != "" ]]
         then
-			sed -i "/.*CONNEXION TO MARIADB.*/a -A INPUT -p tcp -m tcp --dport 3306 -s $IPINTEROP -j ACCEPT" /etc/iptables.up.rules
+			sed -i "/.*CONNEXION TO MARIADB.*/a -A INPUT -p tcp -m tcp --dport 3306 -s 10.42.42.103 -j ACCEPT" /etc/iptables.up.rules
         fi
 		iptables-restore < /etc/iptables.up.rules
 
@@ -355,14 +354,14 @@ then
 		fi
 		if [[ $IPAPP != "" ]]
 		then
-			sed -i "s;Define websiteip 192.168.10.54;Define websiteip $IPAPP;" /etc/apache2/sites-enabled/imgprd-hub1.conf
+			sed -i "s;Define websiteip 192.168.10.54;Define websiteip 10.42.42.101;" /etc/apache2/sites-enabled/imgprd-hub1.conf
 		fi
 		
 		echo -e "${G}[+] CONFIG NGINX CONF"
         #Configuration NGINX
 		if [[ $IPAPP != "" ]]
 		then
-			sed -i "s|server 192.168.10.54:4545 max_fails=2;|\tserver $IPAPP:4545 max_fails=2;|" /etc/nginx/sites-enabled/imgprd-hub1
+			sed -i "s|server 192.168.10.54:4545 max_fails=2;|\tserver 10.42.42.101:4545 max_fails=2;|" /etc/nginx/sites-enabled/imgprd-hub1
         fi
 		if [[ $NDD != "" ]]
 		then
