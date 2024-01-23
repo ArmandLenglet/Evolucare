@@ -1,0 +1,135 @@
+#!/bin/bash
+#######################
+# WASS2WASS CORPORATION
+# VERSION DU 08/06/2023
+# V9.1.4
+
+
+#################
+#ORDRE D'EXECUTION : BDD, APP, HUB, INTEROP, UVIEW
+
+#################
+#DO NOT EDIT THIS
+G='\033[32;1m'
+R='\033[0;31m'
+Y='\033[33m'
+W='\033[38m'
+ERRORS=()
+
+#################
+#Variables TO EDIT
+VMTYPE=$(cut -d '-' -f 2 /etc/hostname)
+CLIENT=""								#a changer en minuscule | futur hostname - exemple : (imgprd-app-nomduclient)
+HOSTNAME="imgprd-$VMTYPE"
+AUTOUPDATEH="00"							#a changer | heure autoupdate dans crontab
+AUTOUPDATEM="30"							#a changer | minute autoupdate dans crontab
+IPGATEWAY="" 					#a changer | passerelle reseau
+IP="IP${VMTYPE^^}"
+NETMASK="255.255.255.0" 					#a changer | masque reseau
+NDD=""  				#a changer | nom de domaine du client
+DNS1=""							#peut etre remplace par une ip entre guillemets "" ou quotes ''
+DNS2=""
+ISMIPIH=false								#peut etre remplace par une autre ip entre guillemets "" ou quotes ''
+ISHYPERV=true								#HYPERV (true) OR ESX (false)
+ISTX=false									#TX (true) OR NOT TX (false)
+
+#Variables APP
+IPAPP=""   					#a changer | adresse ip de la vm app
+IPP=""       							#a changer | ipp a definir, vide "" par défaut = 1
+HOSTMAIL=""				 		#a changer | serveur mail correspondant au nom de domaine
+USERMAIL=""	    				#a changer | user mail du nom de domaine
+PASSWORDMAIL=''  		 	#a changer | password mail correspondant a l utilisateur du dessus
+
+#Variables BDD
+IPBDD=""   					#a changer | adresse ip de la vm bdd
+IPBDDINTERNE="10.42.42.102"
+
+#Variables HUB
+IPHUB=""   						#a changer, vide "" si aucun | adresse ip de la vm hub
+
+#Variable UVIEW
+IPUVIEW="" 					    #a changer, vide "" si aucun | adresse ip de la vm uview
+
+#Variables INTEROP
+IPINTEROP=""       				#a changer, vide "" si aucun | adresse ip de la vm introp
+
+#Variables APPBIS
+IPAPPBIS=""        			#a changer, vide "" si aucun | adresse ip de la vm appbis
+
+#Variable NAS BACKUP
+IPNAS=""   					#a changer, vide "" si aucun | adresse ip du NAS
+
+################
+#Main GLOBAL
+#Change hostname
+echo -e "${G}[+] EDIT HOSTNAME TO $HOSTNAME"
+echo $HOSTNAME > /etc/hostname
+hostname $HOSTNAME
+sed -i "s;.*127.0.1.1.*;127.0.1.1\t$HOSTNAME;" /etc/hosts
+
+#Change DNS
+cp /dev/null /etc/resolv.conf
+if [[ $IPGATEWAY != "" ]]
+then
+	echo -e "${G}[+] ADD DNS1 TO $DNS1"
+	echo "nameserver $DNS1" >> /etc/resolv.conf
+fi
+echo -e "${G}[+] ADD DNS2 TO $DNS2"
+echo "nameserver $DNS2" >> /etc/resolv.conf
+
+echo -e "${G}[+] EDIT GENERAL SCRIPTS.CONF"
+sed -i 's;.*HOSTNAME_NAGIOS.*;HOSTNAME_NAGIOS="imgprd-bdd";' /opt/scripts/scripts.conf
+
+#CRONTAB
+echo -e "${G}[+] EDIT GENERAL CRONTAB"
+if [[ $AUTOUPDATEH != "" ]] || [[ $AUTOUPDATEM != "" ]]
+then
+	crontab -l | sed -r "s;.*/opt/scripts/autoupdate.sh.*;$AUTOUPDATEM $AUTOUPDATEH     \* \* \*   \/opt\/scripts\/autoupdate.sh \>\> \/var\/log\/etmi\/scripts.log 2\>\&1;g" | crontab -
+fi
+crontab -l | sed '/local-nagios-check/s/^#//g' | crontab -
+	
+#NETWORK file
+if [[ $IPAPP != "" || $IPBDD != "" || $IPINTEROP != "" || $IPHUB != "" || $IPUVIEW != "" ]]
+then
+	echo -e "${G}[+] CONFIGURE ETH0 NETWORK"
+	echo '# This file describes the network interfaces available on your system' > /etc/network/interfaces
+	echo -e "# and how to activate them. For more information, see interfaces(5).\n" >> /etc/network/interfaces
+	echo -e "source /etc/network/interfaces.d/*\n" >> /etc/network/interfaces
+	echo '# The loopback network interface' >> /etc/network/interfaces
+	echo 'auto lo' >> /etc/network/interfaces
+	echo -e "iface lo inet loopback\n" >> /etc/network/interfaces
+	echo '# The primary network interface' >> /etc/network/interfaces
+	echo 'auto eth0' >> /etc/network/interfaces
+	echo 'allow-hotplug eth0' >> /etc/network/interfaces
+	echo 'iface eth0 inet static' >> /etc/network/interfaces
+	echo -e "\taddress ${!IP}" >> /etc/network/interfaces
+	echo -e "\tnetmask $NETMASK" >> /etc/network/interfaces
+	echo -e "\tgateway $IPGATEWAY" >> /etc/network/interfaces
+	echo -e "\tpost-up iptables-restore < /etc/iptables.up.rules\n" >> /etc/network/interfaces
+	echo -e "#auto eth1" >> /etc/network/interfaces
+	echo '#allow-hotplug eth1' >> /etc/network/interfaces
+	echo '#iface eth1 inet static' >> /etc/network/interfaces
+	echo -e "\t#address 10.42.42.X" >> /etc/network/interfaces
+	echo -e	"\t#netmask 255.255.255.0" >> /etc/network/interfaces
+	sed -i "/iface eth0 inet dhcp/d" /etc/network/interfaces
+	systemctl restart networking
+fi
+
+#IPTABLES
+if [[ "$VMTYPE" == "app" || "$VMTYPE" == "hub" ]]
+then
+		echo -e "${G}[+] CONFIGURE GENERAL IPTABLES"
+		if [[ $IPAPPBIS != "" ]]
+        then
+                sed -i '/1443/s/^#//g' /etc/iptables.up.rules
+                sed -i "s;IP_VM_BI;$IPAPPBIS;" /etc/iptables.up.rules
+				sed -i "s;X.X.X:1443;$IPAPPBIS:1443;" /etc/iptables.up.rules
+        fi
+        if [[ $IPUVIEW != "" ]]
+        then
+                sed -i '/444/s/^#//g' /etc/iptables.up.rules
+                sed -i "s;IP_VM_UVIEW;$IPUVIEW;" /etc/iptables.up.rules
+				sed -i "s;X.X.X.X:444;$IPUVIEW:444;" /etc/iptables.up.rules
+        fi
+        iptables-restore < /etc/iptables.up.rules
+fi

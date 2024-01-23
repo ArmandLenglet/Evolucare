@@ -9,7 +9,7 @@
     VMPath2: "D:\\NEW-HYPERV-APP-DISK4\\"
     VMCpu: "4"
     SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "VvSwitch From NIC1"
+    SwitchExterne: "vSwitch From NIC1"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-APPv9.1_master/IMGPRD-APP9.1_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-APP9.1_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"

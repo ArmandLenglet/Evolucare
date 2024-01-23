@@ -8,7 +8,7 @@
     VMPath: "D:\\NEW-HYPERV\\"
     VMCpu: "2"
     SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "VvSwitch From NIC1"
+    SwitchExterne: "vSwitch From NIC1"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-INTEROPv4_master/IMGPRD-INTEROP4.2_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-INTEROP4.2_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"
