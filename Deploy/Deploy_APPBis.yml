@@ -5,10 +5,10 @@
   vars:
     VMClient: "Evolucare interne"
     VMName: "VM-IMGPRD-APPBIS"
-    VMPath: "D:\\HYPERV\\"
+    VMPath: "D:\\NEW-HYPERV\\"
     VMCpu: "2"
     SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "VM-PROD"
+    SwitchExterne: "VvSwitch From NIC1"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-APPBIS-2022_master/IMGPRD-APPBIS-2022-BI_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-APPBIS-2022-BI_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"
