@@ -26,7 +26,7 @@ AUTOUPDATEM="0"							#a changer | minute autoupdate dans crontab
 IPGATEWAY="192.168.29.1" 					#a changer | passerelle reseau
 IP="IP${VMTYPE^^}"
 NETMASK="255.255.255.0" 					#a changer | masque reseau
-NDD="575"  				#a changer | nom de domaine du client
+NDD=""  				#a changer | nom de domaine du client
 DNS1=$IPGATEWAY							#peut etre remplace par une ip entre guillemets "" ou quotes ''
 DNS2="1.1.1.1"
 ISMIPIH=false								#peut etre remplace par une autre ip entre guillemets "" ou quotes ''
@@ -36,7 +36,7 @@ ISTX=false									#TX (true) OR NOT TX (false)
 #Variables APP
 IPAPP="192.168.29.240"   					#a changer | adresse ip de la vm app
 IPAPPINTERNE="10.42.42.2"
-IPP="573"       							#a changer | ipp a definir, vide "" par défaut = 1
+IPP="575"       							#a changer | ipp a definir, vide "" par défaut = 1
 HOSTMAIL="mail.xxx.xx"				 		#a changer | serveur mail correspondant au nom de domaine
 USERMAIL="noreply@xxx.xx"	    				#a changer | user mail du nom de domaine
 PASSWORDMAIL='xxxxxxxxx'  		 	#a changer | password mail correspondant a l utilisateur du dessus
