@@ -4,11 +4,11 @@
   gather_facts: no
   vars:
     VMClient: "Evolucare interne"
-    VMName: "VM-IMGPRD-BDD-NEW"
-    VMPath: "D:\\NEW-HYPERV\\"
+    VMName: "VM-IMGPRD-BDD"
+    VMPath: "D:\\HYPERV\\"
     VMCpu: "4"
     SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "vSwitch From NIC1"
+    SwitchExterne: "VM-PROD"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-BDDv9.1_master/IMGPRD-BDD9.1_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-BDD9.1_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"

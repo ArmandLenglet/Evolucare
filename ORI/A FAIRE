@@ -1,8 +1,74 @@
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJTuVeD9P/6t7eibB81p5PPBHKd2/oGRCrmF3hDQ673VO9N78407nWKAFRwj8KeyRdfgaR0bx8QdnkC+WVtkBDXRoSgHHNT7IG35hcwPyH9jpBalwyiYeuUNDLmCK8ZCgWpNG/BAzedg7OBP5OAPbYfQhAQBE7cymq8QfPnLXZuK02nMe1VuKGb+oDT2njcrj1iWoxc7mzP/VQEBgpr9cO7mmQrs8eyD94CMhMco8pfayF2BJMjlNnas+9rzmBiHpu8OanBshEgRVX3nNQnruec8mOxlVkph8q484wnLDGvUhkt99BhBdBXtUcuEdqliKfmyq9/JX3WSMnRdoRMPLFR+gpggLz1/XUwui9i5iCW4VJDjX7Dr2SsOlDuC340fcxcm+SMNtpMjMEtXcWyyZh5o7gjhahEFYRpMVCTlmoSSduFI9AKdYrd23Hrbcyi8iZsQ0GqMz1usjjrCRcHFJINA1Jxs3/vusOoUGseulCXcMyk0lwzkBGSpA6XnirabTW3qYTR90udHJ7MlcdaheimcgXRKjGJ9wTpogDQ75X4TLDzUgg2SgPzPLgjfHE5EchX1uqbLpVI6ywcCcl4+JkIenxWhrqo0PpstEmH4C21LIw5IR8YnEQNVjmeuhaCN1lm2ILPkNLUk9HQJ8ILsUC0fRmEMXeplI81YwG1o3NLQ== support@imgprd-hub
+------------------------ HUB
 
-hub
+        #Activation des services PACS
+		echo -e "${G}[+] ENABLE LICENCES PACS${W}"
+        #/opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xt3rdParty | sudo xargs /opt/etmi/ECS/xtLicence -register xt3rdParty
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtDiskMgr | sudo xargs /opt/etmi/ECS/xtLicence -register xtDiskMgr
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtImporter | sudo xargs /opt/etmi/ECS/xtLicence -register xtImporter
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtMonitor | sudo xargs /opt/etmi/ECS/xtLicence -register xtMonitor
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtQRSCP | sudo xargs /opt/etmi/ECS/xtLicence -register xtQRSCP
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtQRSCU | sudo xargs /opt/etmi/ECS/xtLicence -register xtQRSCU
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtRecorder | sudo xargs /opt/etmi/ECS/xtLicence -register xtRecorder
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtStoreSCP | sudo xargs /opt/etmi/ECS/xtLicence -register xtStoreSCP
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtStoreSCU | sudo xargs /opt/etmi/ECS/xtLicence -register xtStoreSCU
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtUploader | sudo xargs /opt/etmi/ECS/xtLicence -register xtUploader
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtWLSCP | sudo xargs /opt/etmi/ECS/xtLicence -register xtWLSCP
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen ecswss4web | sudo xargs /opt/etmi/ECS/xtLicence -register ecswss4web
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtNotifier | sudo xargs /opt/etmi/ECS/xtLicence -register xtNotifier
+        /opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xtPreFetcher | sudo xargs /opt/etmi/ECS/xtLicence -register xtPreFetcher
+        /opt/etmi/ECS/xtInit start
+		
+        #Configuration du client SMTP
+		if [[ "$HOSTMAIL" != "" || "$USERMAIL" != "" || "$PASSWORDMAIL" != "" ]]
+		then
+			echo -e "${G}[+] SET MAIL MSMTPRC${W}"
+			sed -i "s;host mail.xxx;host $HOSTMAIL;" /etc/msmtprc
+			sed -i "s;user noreply@xxx;user $USERMAIL;" /etc/msmtprc
+			sed -i "s;password XXXXXXXXX;password $PASSWORDMAIL;" /etc/msmtprc
+			sed -i "s;from noreply@xxx;from $USERMAIL;" /etc/msmtprc
+			chmod 0644 /etc/msmtprc
+			chown www-data:www-data /etc/msmtprc
+			if echo -e "Subject: Test Mail\r\n\r\nThis is a test mail" | msmtp --debug -t "itimaging@evolucare.com" 2>/dev/null; then
+				echo -e "${G}[+] SEND TEST MAIL MSMTPRC: OK"
+			else
+				echo -e "${R}[-] SEND TEST MAIL MSMTPRC: ERROR, PLEASE CHECK /ETC/MSMTPRC CONFIG"
+				ERRORS+=("MSMTP")
+			fi
+			
+			for PHPINIFILE in `find /etc/php*/ -name "php.ini"`; do sed -i 's/-C\ \/etc\/msmtprc_php//g' $PHPINIFILE; done
+			for PHPINIFILE in `find /etc/php*/ -name "php.ini"`; do sed -i 's/-C\ \/etc\/msmtprc//g' $PHPINIFILE; done
+			for PHPINIFILE in `find /etc/php*/ -name "php.ini"`; do sed -i "s/--logfile\ \/var\/log\/msmtp.log//g" $PHPINIFILE; done
+			rm -f /var/log/msmtp.log
+			rm -f /etc/msmtprc_php
+			grep --silent "syslog on" /etc/msmtprc || echo "syslog on" >> /etc/msmtprc
+		fi
 
-sed -i "s;Define websiteurl ecstest.evolucare.com;Define websiteurl $NDD;" /etc/apache2/sites-enabled/imgprd-hub1.conf
-sed -i "s|server_name ecstest.evolucare.com;|\tserver_name $NDD;|" /etc/nginx/sites-enabled/imgprd-hub1
-systemctl restart apache2
-systemctl restart nginx
+    		if [[ $NDD != "" ]]
+		then	
+			sed -i "s;Define websiteurl ecstest.evolucare.com;Define websiteurl $NDD;" /etc/apache2/sites-enabled/imgprd-hub1.conf	
+		fi
+
+    		if [[ $NDD != "" ]]
+		then
+			sed -i "s|server_name ecstest.evolucare.com;|\tserver_name $NDD;|" /etc/nginx/sites-enabled/imgprd-hub1
+		fi
+
+            #Generer cle ssh avec support
+		echo -e "${G}[+] GENERATE SSH KEY"
+        su - support -c 'ssh-keygen -b 4096 -t rsa -f ~/.ssh/id_rsa -q -N ""'
+        chmod 600 /home/support/.ssh/id_rsa; chmod 600 /home/support/.ssh/id_rsa.pub
+    
+---------------------------------------------------- app
+
+		#config site ssl apache2
+		if [[ $NDD != "" ]]
+		then
+			echo -e "${G}[+] Set $NDD in vhost 1-ssl.conf"
+			sed -i "s;NDD;$NDD;" /etc/apache2/sites-available/1-ssl.conf
+		fi
+            #IPP
+		if [[ $IPP != "" ]]
+		then
+			echo -e "${G}[+] SET IPP"
+			echo $IPP > /opt/etmi/ECS/.shistukendayo
+		fi
