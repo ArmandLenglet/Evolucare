@@ -15,9 +15,7 @@ Write-Host "START INSTALL  !" -NoNewLine -ForeGroundColor Green
 ##Set-ExecutionPolicy RemoteSigned
 
 #Activation HyperV 
-#Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
-# Ou -->
-#DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
+#Install-WindowsFeature -Name Hyper-V -ComputerName <computer_name> -IncludeManagementTools -Restart
 
 #$DateAction = get-date -format "dd/MM/yyyy HH:mm:ss"
 #write-host $DateAction Activation of high energy performance for Windows -NoNewLine -ForeGroundColor Green

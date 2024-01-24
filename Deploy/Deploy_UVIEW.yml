@@ -5,10 +5,10 @@
   vars:
     VMClient: "Evolucare interne"
     VMName: "VM-IMGPRD-UVIEW"
-    VMPath: "D:\\HYPERV\\"
+    VMPath: "M:\\HYPERV\\"
     VMCpu: "2"
     SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "VM-PROD"
+    SwitchExterne: "LAN_Externe"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-UVIEWv2.2.1_master/IMGPRD-UVIEW_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-UVIEW_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"
