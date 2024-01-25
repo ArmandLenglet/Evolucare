@@ -1,5 +1,24 @@
------------------------- HUB
+      -------------------------------------------------------------------APP
+	    #IPP
+		if [[ $IPP != "" ]]
+		then
+			echo -e "${G}[+] SET IPP"
+			echo $IPP > /opt/etmi/ECS/.shistukendayo
+		fi
 
+	    #UUID IMGPRD-APP
+        HOSTBDD=$(grep "sql_hostname" /opt/etmi/ECS/config.ini | cut -d'=' -f2)
+        PORTBDD=$(grep "sql_port" /opt/etmi/ECS/config.ini | cut -d'=' -f2)
+        USERBDD=rwuser
+		if echo "quit" | telnet "$HOSTBDD" "3306" 2>/dev/null | grep -q "Escape character is '^]'"; then
+			echo -e "${G}[+] GENERATE BDDUID"
+			mysql ecspreferences -h $HOSTBDD -P $PORTBDD -u$USERBDD -p'fA3?ytcPYKp!=i6KFR&S' -e "DELETE FROM configuration WHERE name='server_uuid';INSERT INTO configuration SET value=UUID(), name='server_uuid', comment='Identifiant unique du serveur, utilisé comme identifiant dans le système de mise à jour'; SELECT * FROM configuration WHERE name LIKE '%UUID%';" | grep uuid | cut -d$'\t' -f3
+			BDDUID=$(mysql ecspreferences -h $HOSTBDD -P $PORTBDD -u$USERBDD -p'fA3?ytcPYKp!=i6KFR&S' -e "DELETE FROM configuration WHERE name='server_uuid';INSERT INTO configuration SET value=UUID(), name='server_uuid', comment='Identifiant unique du serveur, utilisé comme identifiant dans le système de mise à jour'; SELECT * FROM configuration WHERE name LIKE '%UUID%';" | grep uuid | cut -d$'\t' -f3)
+		else
+			echo -e "${R}[-] ERROR GENERATE BDDUID\n- From VM BDD: check iptables of vm BDD\n- From VM APP: check the bdd ip in /opt/etmi/ECS/config.ini"
+			ERRORS+=("BDDUID")
+		fi
+		
         #Activation des services PACS
 		echo -e "${G}[+] ENABLE LICENCES PACS${W}"
         #/opt/etmi/ECS/xtLicence -systemid | xargs /opt/etmi/ECS/xtLicence -keygen xt3rdParty | sudo xargs /opt/etmi/ECS/xtLicence -register xt3rdParty
@@ -42,33 +61,12 @@
 			rm -f /etc/msmtprc_php
 			grep --silent "syslog on" /etc/msmtprc || echo "syslog on" >> /etc/msmtprc
 		fi
-
-    		if [[ $NDD != "" ]]
-		then	
-			sed -i "s;Define websiteurl ecstest.evolucare.com;Define websiteurl $NDD;" /etc/apache2/sites-enabled/imgprd-hub1.conf	
-		fi
-
-    		if [[ $NDD != "" ]]
+	
+		#Config fstab
+		if [[ $IPNAS != "" ]]
 		then
-			sed -i "s|server_name ecstest.evolucare.com;|\tserver_name $NDD;|" /etc/nginx/sites-enabled/imgprd-hub1
+			echo -e "${G}[+] CREATE TEMPLATE FSTAB FOR NAS"
+			echo "#BACKUPNAS - CIFS" >> /etc/fstab
+			echo "#$IPNAS:/backupnas /mnt/backupnas nfs rw,auto 0 0" >> /etc/fstab
 		fi
-
-            #Generer cle ssh avec support
-		echo -e "${G}[+] GENERATE SSH KEY"
-        su - support -c 'ssh-keygen -b 4096 -t rsa -f ~/.ssh/id_rsa -q -N ""'
-        chmod 600 /home/support/.ssh/id_rsa; chmod 600 /home/support/.ssh/id_rsa.pub
-    
----------------------------------------------------- app
-
-		#config site ssl apache2
-		if [[ $NDD != "" ]]
-		then
-			echo -e "${G}[+] Set $NDD in vhost 1-ssl.conf"
-			sed -i "s;NDD;$NDD;" /etc/apache2/sites-available/1-ssl.conf
-		fi
-            #IPP
-		if [[ $IPP != "" ]]
-		then
-			echo -e "${G}[+] SET IPP"
-			echo $IPP > /opt/etmi/ECS/.shistukendayo
-		fi
+		
