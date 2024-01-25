@@ -19,14 +19,14 @@ ERRORS=()
 #################
 #Variables TO EDIT
 VMTYPE=$(cut -d '-' -f 2 /etc/hostname)
-CLIENT="lumumbashi"								#a changer en minuscule | futur hostname - exemple : (imgprd-app-nomduclient)
+CLIENT="drelghozi"								#a changer en minuscule | futur hostname - exemple : (imgprd-app-nomduclient)
 HOSTNAME="imgprd-$VMTYPE-$CLIENT"
-AUTOUPDATEH="6"							#a changer | heure autoupdate dans crontab
-AUTOUPDATEM="0"							#a changer | minute autoupdate dans crontab
-IPGATEWAY="192.168.29.1" 					#a changer | passerelle reseau
+AUTOUPDATEH="0"							#a changer | heure autoupdate dans crontab
+AUTOUPDATEM="30"							#a changer | minute autoupdate dans crontab
+IPGATEWAY="10.1.247.254" 					#a changer | passerelle reseau
 IP="IP${VMTYPE^^}"
 NETMASK="255.255.255.0" 					#a changer | masque reseau
-NDD=""  				#a changer | nom de domaine du client
+NDD="imageriemedicaleecm.fr"  				#a changer | nom de domaine du client
 DNS1=$IPGATEWAY							#peut etre remplace par une ip entre guillemets "" ou quotes ''
 DNS2="1.1.1.1"
 ISMIPIH=false								#peut etre remplace par une autre ip entre guillemets "" ou quotes ''
@@ -36,29 +36,29 @@ ISTX=false									#TX (true) OR NOT TX (false)
 #Variables APP
 IPAPP="192.168.29.240"   					#a changer | adresse ip de la vm app
 IPAPPINTERNE="10.42.42.2"
-IPP="575"       							#a changer | ipp a definir, vide "" par défaut = 1
-HOSTMAIL="mail.xxx.xx"				 		#a changer | serveur mail correspondant au nom de domaine
-USERMAIL="noreply@xxx.xx"	    				#a changer | user mail du nom de domaine
-PASSWORDMAIL='xxxxxxxxx'  		 	#a changer | password mail correspondant a l utilisateur du dessus
+IPP="576"       							#a changer | ipp a definir, vide "" par défaut = 1
+HOSTMAIL="mail.imageriemedicaleecm.fr"				 		#a changer | serveur mail correspondant au nom de domaine
+USERMAIL="noreply@imageriemedicaleecm.fr"	    				#a changer | user mail du nom de domaine
+PASSWORDMAIL='rQ9*jaE39qMK4YA'  		 	#a changer | password mail correspondant a l utilisateur du dessus
 
 #Variables BDD
-IPBDD="192.168.29.241"   					#a changer | adresse ip de la vm bdd
+IPBDD="10.1.247.44"   					#a changer | adresse ip de la vm bdd
 IPBDDINTERNE="10.42.42.3"
 
 #Variables HUB
-IPHUB="192.168.29.244"   						#a changer, vide "" si aucun | adresse ip de la vm hub
+IPHUB="10.1.247.45"   						#a changer, vide "" si aucun | adresse ip de la vm hub
 
 #Variable UVIEW
-IPUVIEW="192.168.29.242" 					    #a changer, vide "" si aucun | adresse ip de la vm uview
+IPUVIEW="" 					    #a changer, vide "" si aucun | adresse ip de la vm uview
 
 #Variables INTEROP
-IPINTEROP="192.168.29.243"       				#a changer, vide "" si aucun | adresse ip de la vm introp
+IPINTEROP="10.1.247.46"       				#a changer, vide "" si aucun | adresse ip de la vm introp
 
 #Variables APPBIS
-IPAPPBIS="192.168.29.245"        			#a changer, vide "" si aucun | adresse ip de la vm appbis
+IPAPPBIS="10.1.247.48"        			#a changer, vide "" si aucun | adresse ip de la vm appbis
 
 #Variable NAS BACKUP
-IPNAS="192.168.29.252"   					#a changer, vide "" si aucun | adresse ip du NAS
+IPNAS=""   					#a changer, vide "" si aucun | adresse ip du NAS
 
 ################
 #Main GLOBAL
