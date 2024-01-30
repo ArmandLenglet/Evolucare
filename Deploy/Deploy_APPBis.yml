@@ -8,7 +8,7 @@
     VMPath: "M:\\HYPERV\\"
     VMCpu: "4"
     SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "LAN_Externe"
+    SwitchExterne: "vSwitch Externe"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-APPBIS-2022_master/IMGPRD-APPBIS-2022-BI_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-APPBIS-2022-BI_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"
