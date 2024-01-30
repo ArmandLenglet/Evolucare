@@ -5,7 +5,7 @@
   vars:
     VMClient: "Evolucare interne"
     VMName: "VM-IMGPRD-APP"
-    VMPath: "M:\\HYPERV\\"
+    VMPath: "P:\\HYPERV\\"
     VMPath2: "O:\\HYPERV-APP-DISK4\\"
     VMCpu: "4"
     SwitchInterne: "vSwitch Interne"
