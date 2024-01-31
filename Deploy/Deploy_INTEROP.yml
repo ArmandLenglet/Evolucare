@@ -5,10 +5,10 @@
   vars:
     VMClient: "Evolucare interne"
     VMName: "VM-IMGPRD-INTEROP"
-    VMPath: "O:\\HYPERV\\"
+    VMPath: "M:\\HYPERV\\"
     VMCpu: "2"
     SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "LAN_Externe"
+    SwitchExterne: "vSwitch Externe"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-INTEROPv4_master/IMGPRD-INTEROP4.2_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-INTEROP4.2_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"

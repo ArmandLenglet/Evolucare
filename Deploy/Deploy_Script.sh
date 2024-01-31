@@ -16,7 +16,7 @@ Y='\033[33m'
 W='\033[38m'
 ERRORS=()
 
-#################
+##################
 #Variables TO EDIT
 VMTYPE=$(cut -d '-' -f 2 /etc/hostname)
 CLIENT="drelghozi"								#a changer en minuscule | futur hostname - exemple : (imgprd-app-nomduclient)

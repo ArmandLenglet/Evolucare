@@ -5,7 +5,7 @@ RUN apt-get update \
 && apt-get install -y curl software-properties-common wget unzip \
 && rm -rf /var/lib/apt/lists/*
 
-COPY C:\Users\a.lenglet\OneDrive - EVOLUCARE TECHNOLOGIES\Documents\Dev_downloads\imgprd-appdeb10-9.0.1.3v3.tar.gz /home/depotapp/
+COPY C:/tmp/imgprd-appdeb10-9.0.1.3v3.tar.gz /home/depotapp/
 
 RUN useradd -s /bin/bash -m support \
 && export PATH=$PATH:/usr/sbin
