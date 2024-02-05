@@ -3,15 +3,57 @@ services:
   imgprdbdd:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_BDD
     command: sleep infinity
+    privileged: true
     ports:
-      - 3306:3306
       - 4444:4444
       - 4567:4567
       - 4568:4568
     volumes:
       - imgprdbdd:/data
+    networks:
+      Evolucareinterne:
+          ipv4_address: 172.19.0.2
+
+  imgprdapp:
+    build: 
+      context: .
+      dockerfile: Dockerfile_APP
+    command: sleep infinity
+    privileged: true
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - imgprdapp:/data
+    networks:
+      Evolucareinterne:
+           ipv4_address: 172.19.0.3
+
+  db:
+    image: mariadb
+    environment:
+        MYSQL_ROOT_PASSWORD: azerty
+        MYSQL_DATABASE: test
+        MYSQL_USER: test
+        MYSQL_PASSWORD: azerty
+    volumes:
+         - data:/var/lib/mysql
+    ports:
+         - "3306:3306"
+    networks:
+        Evolucareinterne:
+           ipv4_address: 172.19.0.4
 
 volumes:
   imgprdbdd:
+  imgprdapp:
+  data:
+
+networks:
+  Evolucareinterne:
+       ipam:
+        driver: default
+        config:
+          - subnet: 172.19.0.0/16
