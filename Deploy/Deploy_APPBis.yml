@@ -20,7 +20,7 @@
 
     - name: Créer la machine virtuelle {{ VMName }}
       ansible.windows.win_shell: |
-        New-VM -Name "{{ VMName }}" -MemoryStartupBytes 12884901888 -Generation 2 -SwitchName "{{ SwitchExterne }}" -Path "{{ VMPath }}"
+        New-VM -Name "{{ VMName }}" -MemoryStartupBytes 4294967296 -Generation 2 -SwitchName "{{ SwitchExterne }}" -Path "{{ VMPath }}"
         Set-VM -Name "{{ VMName }}" -ProcessorCount "{{ VMCpu }}"
         New-Item "{{ DiskPath }}" -ItemType Directory
         Add-VMNetworkAdapter -VMName "{{ VMName }}" -SwitchName "{{ SwitchInterne }}"
