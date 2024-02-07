@@ -11,6 +11,13 @@ services:
       - 443:443
     volumes:
       - imgprdapp:/data
+    networks:
+      Evolucareinterne:
+          # ipv4_address: 10.3.0.3
 
 volumes:
   imgprdapp:
+
+networks:
+  Evolucareinterne:
+
