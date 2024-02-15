@@ -5,10 +5,10 @@
   vars:
     VMClient: "Evolucare interne"
     VMName: "VM-IMGPRD-INTEROP"
-    VMPath: "M:\\HYPERV\\"
+    VMPath: "H:\\HYPERV\\"
     VMCpu: "2"
-    SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "vSwitch Externe"
+    SwitchInterne: "EVOLUCARE vSwitch Interne"
+    SwitchExterne: "HPE FlexFabric 10Gb 2-port 533FLR-T Adapter #2 - Virtual Switch"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-INTEROPv4_master/IMGPRD-INTEROP4.2_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-INTEROP4.2_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"

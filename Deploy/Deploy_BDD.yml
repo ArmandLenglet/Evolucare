@@ -5,10 +5,10 @@
   vars:
     VMClient: "Evolucare interne"
     VMName: "VM-IMGPRD-BDD"
-    VMPath: "O:\\HYPERV\\"
+    VMPath: "H:\\HYPERV\\"
     VMCpu: "4"
-    SwitchInterne: "vSwitch Interne"
-    SwitchExterne: "vSwitch Externe"
+    SwitchInterne: "EVOLUCARE vSwitch Interne"
+    SwitchExterne: "HPE FlexFabric 10Gb 2-port 533FLR-T Adapter #2 - Virtual Switch"
     URLHUB: "https://downloads-imaging.evolucare.com/masters/IMGPRD-BDDv9.1_master/IMGPRD-BDD9.1_MASTER_HV.zip"
     DiskDestination: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\IMGPRD-BDD9.1_MASTER_HV.zip"
     DiskPath: "{{ VMPath }}{{ VMName }}\\Virtual Hard Disks\\"
@@ -17,6 +17,18 @@
     Cred: New-Object System.Management.Automation.PSCredential ("{{ UserName }}{{ UserPassword }}")
         
   tasks:
+
+    - name: Création des vSwitch Interne
+      ansible.windows.win_shell: |
+        New-VMSwitch -Name "{{ SwitchInterne }}" -SwitchType Internal -Notes "For Evolucare Imaging Internal VMs"
+        New-NetIPAddress -IPAddress 10.42.42.1 -InterfaceAlias "vEthernet ({{ SwitchInterne }})"
+        Disable-NetAdapterBinding -InterfaceAlias "vEthernet ({{ SwitchInterne }})" -ComponentID ms_tcpip6
+      ignore_errors: true
+      register: vswitch_interne_output
+
+    - name: Check vérification
+      debug:
+          var: vswitch_interne_output.stdout
 
     - name: Créer la machine virtuelle {{ VMName }}
       ansible.windows.win_shell: |
