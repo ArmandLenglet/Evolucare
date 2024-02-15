@@ -4,7 +4,7 @@
   gather_facts: no
   vars:
     VMClient: "Evolucare interne"
-    VMName: "VM-IMGPRD-BDD"
+    VMName: "EVOLUCARE-VM-IMGPRD-BDD"
     VMPath: "H:\\HYPERV\\"
     VMCpu: "4"
     SwitchInterne: "EVOLUCARE vSwitch Interne"
