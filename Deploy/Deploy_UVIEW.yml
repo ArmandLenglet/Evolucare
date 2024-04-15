@@ -5,7 +5,7 @@
   vars:
     VMClient: "Evolucare interne"
     VMName: "EVOLUCARE-VM-IMGPRD-UVIEW"
-    VMPath: "H:\\HYPERV\\"
+    VMPath: "D:\\HYPERV\\"
     VMCpu: "2"
     SwitchInterne: "vSwitch Interne"
     SwitchExterne: "vSwitch Externe"
