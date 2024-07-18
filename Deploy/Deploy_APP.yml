@@ -6,7 +6,7 @@
     VMClient: "Evolucare interne"
     VMName: "EVOLUCARE-VM-IMGPRD-APP"
     VMPath: "V:\\HYPER-V\\"
-    VMPath2: "I:\\HYPER-V-APP-DISK4\\"
+    VMPath2: "I:\\HYPER-V\\"
     VMCpu: "4"
     SwitchInterne: "vSwitch Interne"
     SwitchExterne: "vSwitch Externe"
